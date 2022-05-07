@@ -1,5 +1,7 @@
 from django.db import models
 from users.models import CustomUser
+from products.models import Product
+
 
 
 class Order(models.Model):
@@ -9,3 +11,17 @@ class Order(models.Model):
     delivered = models.BooleanField(default=False)
     pescription = models.FileField(upload_to="files/pescriptions", max_length=100)
     payment = models.BooleanField(default=False)
+
+
+    
+
+
+
+
+class OrderItems(models.Model):
+    item = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete = models.CASCADE )
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        verbose_name_plural = 'Order Items'

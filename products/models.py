@@ -1,8 +1,14 @@
 from django.db import models
 from users.models import CustomUser
+from django.utils.text import slugify
+from django.db.models.signals import pre_save, post_save
+
+
+
 
 class Product(models.Model):
     name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
     description = models.CharField(max_length=100)
     manufacturer = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=6, decimal_places=2)
@@ -11,16 +17,63 @@ class Product(models.Model):
     image = models.ImageField()
     seller = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     category = models.ForeignKey("Category", on_delete = models.CASCADE)
+    overTheCounter = models.BooleanField(default =False)
+    created = models.DateField( auto_now=True)
 
+
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+    
     
 
 
+def product_pre_save(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug  = slugify(instance.name)
+        exists= Product.objects.filter(slug=instance.slug).exists() #check if slug exists
+
+        if exists:
+            
+            
+            num = Product.objects.filter(name=instance.name).count() #count number of objects with similar name
+        
+            instance.slug = "%s-%s"%(instance.slug, num + 1)
+        
+        instance.slug = instance.slug
+
+    
+pre_save.connect(product_pre_save, sender = Product, weak=False)
+
+
+
 class Category(models.Model):
+    
     name = models.CharField(max_length = 50)
     description = models.CharField(max_length = 100)
+    slug = models.SlugField(null=True, blank = True)
+
+    class Meta:
+        verbose_name_plural = 'Categories'
 
 
+def category_pre_save(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        print("category signal")
+        print(instance)
+        instance.slug  = slugify(instance.name)
+        exists= Category.objects.filter(slug=instance.slug).exists() #check if slug exists
 
+        if exists:
+            
+            
+            num = Category.objects.filter(name=instance.name).count() #count number of objects with similar name
+        
+            instance.slug = "%s-%s"%(instance.slug, num + 1)
+        
+        instance.slug = instance.slug
 
+    
+pre_save.connect(category_pre_save, sender = Category, weak=False)
 
 
