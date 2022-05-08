@@ -8,19 +8,23 @@ from django.db.models.signals import pre_save, post_save
 
 class Product(models.Model):
     name = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(blank = True, null = True)
     description = models.CharField(max_length=100)
     manufacturer = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     quantityInProduct = models.CharField(max_length=50)
     quantityInStock = models.IntegerField(default = 0)
-    image = models.ImageField()
-    seller = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    category = models.ForeignKey("Category", on_delete = models.CASCADE)
+    image = models.ImageField(upload_to="files/products/images")
+    seller = models.ForeignKey(CustomUser, related_name = "products", on_delete=models.CASCADE)
+    category = models.ForeignKey("Category", related_name ="products", on_delete = models.CASCADE)
     overTheCounter = models.BooleanField(default =False)
-    created = models.DateField( auto_now=True)
+    created = models.DateField( auto_now_add=True)
+    updated = models.DateField( auto_now=True)
+    available = models.BooleanField(default=True)
 
-
+    def __str__(self):
+        return self.name
+    
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -56,11 +60,14 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'Categories'
 
+    def __str__(self):
+        return self.name
+    
+
 
 def category_pre_save(sender, instance, *args, **kwargs):
     if not instance.slug:
-        print("category signal")
-        print(instance)
+        
         instance.slug  = slugify(instance.name)
         exists= Category.objects.filter(slug=instance.slug).exists() #check if slug exists
 
