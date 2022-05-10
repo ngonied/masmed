@@ -35,3 +35,32 @@ class OrderItems(models.Model):
     def __str__(self):
         return self.item
     
+
+
+class Cart(models.Model):
+    customer = models.ForeignKey(CustomUser, on_delete =models.CASCADE)
+    cart_id = models.CharField(max_length = 200)
+    pescription = models.FileField( upload_to='files/pescriptions', max_length=100, null = True)
+    paid = models.BooleanField(default=False)
+    date = models.DateField(auto_now_add=True)
+    pay_on_delivery = models.BooleanField(default= False)
+
+    def get_total_price(self):
+        total_price = 0
+        for item in self.items_set.all():
+            total_price += item.product.price
+
+    def __iter__(self):
+        products = self.items.set_all()
+        for product in products:
+            total_price += product.product.price * product.quantity
+            yield total_price
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name = 'items', on_delete = models.CASCADE)
+    product = models.ForeignKey(Product, on_delete = models.CASCADE)
+    quantity = models.PositiveIntegerField(default = 1)
+
+    def __str__(self):
+        return '{} {}'.format(self.product.name, self.quantity)
