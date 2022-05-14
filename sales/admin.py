@@ -1,12 +1,11 @@
 from django.contrib import admin
 
-from .models import Order, OrderItems, Cart, CartItem
+from .models import Order, OrderItem
 
 
 
 
 admin.site.register(Order)
-admin.site.register(OrderItems)
-admin.site.register(Cart)
-admin.site.register(CartItem)
+admin.site.register(OrderItem)
+
 
