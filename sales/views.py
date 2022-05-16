@@ -5,6 +5,7 @@ from .models import Order, OrderItem
 from .serializers import OrderSerializer
 from rest_framework import status, permissions
 from rest_framework.response import Response
+from .tasks import order_created
 
 
 class CreateOrder(APIView):
@@ -26,6 +27,7 @@ class CreateOrder(APIView):
             
 
             cart.clear()
+            order_created.delay(order.id)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else: 
             return Response(serializer.errors)

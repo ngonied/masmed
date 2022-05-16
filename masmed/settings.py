@@ -142,3 +142,11 @@ REST_FRAMEWORK = {
 
 
 CART_SESSION_ID = 'cart' #cart application settings using sessions
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 465 #587
+EMAIL_HOST_USER = "ngoniechizororo@gmail.com"
+EMAIL_HOST_PASSWORD = "nyikadzino14083"
